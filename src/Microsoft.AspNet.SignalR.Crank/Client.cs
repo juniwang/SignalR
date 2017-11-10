@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.SignalR.Crank
         private static HubConnection ControllerConnection;
         private static IHubProxy ControllerProxy;
         private static ControllerEvents TestPhase = ControllerEvents.None;
-	    private static IConnectionFactory Factory;
+        private static IConnectionFactory Factory;
 
         public static void Main()
         {
@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.SignalR.Crank
             ThreadPool.SetMinThreads(Arguments.Connections, 2);
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-	        ComposeConnectionFactory();
+            ComposeConnectionFactory();
 
             if (Arguments.IsController)
             {
@@ -40,38 +40,38 @@ namespace Microsoft.AspNet.SignalR.Crank
             Run().Wait();
         }
 
-		private static void ComposeConnectionFactory()
-		{
-			try
-			{
-				using (var catalog = new DirectoryCatalog(AppDomain.CurrentDomain.BaseDirectory))
-				using (var container = new CompositionContainer(catalog))
-				{
-					var export = container.GetExportedValueOrDefault<IConnectionFactory>();
-					if (export != null)
-					{
-						Factory = export;
-						Console.WriteLine("Using {0}", Factory.GetType());
-					}
-				}
-			}
-			catch (ImportCardinalityMismatchException)
-			{
-				Console.WriteLine("More than one IConnectionFactory import was found.");
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-			}
+        private static void ComposeConnectionFactory()
+        {
+            try
+            {
+                using (var catalog = new DirectoryCatalog(AppDomain.CurrentDomain.BaseDirectory))
+                using (var container = new CompositionContainer(catalog))
+                {
+                    var export = container.GetExportedValueOrDefault<IConnectionFactory>();
+                    if (export != null)
+                    {
+                        Factory = export;
+                        Console.WriteLine("Using {0}", Factory.GetType());
+                    }
+                }
+            }
+            catch (ImportCardinalityMismatchException)
+            {
+                Console.WriteLine("More than one IConnectionFactory import was found.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
-			if (Factory == null)
-			{
-				Factory = new DefaultConnectionFactory();
-				Console.WriteLine("Using default connection factory...");
-			}
-		}
+            if (Factory == null)
+            {
+                Factory = new DefaultConnectionFactory();
+                Console.WriteLine("Using default connection factory...");
+            }
+        }
 
-	    private static async Task Run()
+        private static async Task Run()
         {
             var remoteController = !Arguments.IsController || (Arguments.NumClients > 1);
 
@@ -201,13 +201,16 @@ namespace Microsoft.AspNet.SignalR.Crank
 
         private static async Task RunSend()
         {
-            var payload = (Arguments.SendBytes == 0) ? String.Empty : new string('a', Arguments.SendBytes);
-
+            var payload = (Arguments.SendBytes == 0) ? string.Empty : new string('a', Arguments.SendBytes);
             while (TestPhase == ControllerEvents.Send)
             {
-                if (!String.IsNullOrEmpty(payload))
+                if (!string.IsNullOrEmpty(payload))
                 {
-                    await Task.WhenAll(Connections.Select(c => c.Send(payload)));
+                    await Task.WhenAll(Connections.Select(c =>
+                    {
+                        var payloadWithTimestamp = "C" + DateTime.UtcNow.Ticks.ToString() + "|" + payload;
+                        return c.Send(payloadWithTimestamp);
+                    }));
                 }
 
                 await Task.Delay(Arguments.SendInterval);
@@ -287,7 +290,18 @@ namespace Microsoft.AspNet.SignalR.Crank
 
         private static Connection CreateConnection()
         {
-	        return Factory.CreateConnection(Arguments.Url);
+            var conn = Factory.CreateConnection(Arguments.Url);
+            conn.Received += Conn_Received;
+            return conn;
+        }
+
+        private static void Conn_Received(string data)
+        {
+            if (data.Length <= 40)
+                return;
+
+            string ticks = data.Substring(0, 40);
+            Latency.UpdateLatency(ticks);
         }
     }
 }

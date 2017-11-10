@@ -85,6 +85,7 @@
     <Compile Include="CrankArguments.cs" />
     <Compile Include="DefaultConnectionFactory.cs" />
     <Compile Include="IConnectionFactory.cs" />
+    <Compile Include="Latency.cs" />
     <Compile Include="PerformanceCounters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
