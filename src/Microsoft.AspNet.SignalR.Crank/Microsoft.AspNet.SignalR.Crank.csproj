@@ -86,10 +86,15 @@
     <Compile Include="DefaultConnectionFactory.cs" />
     <Compile Include="IConnectionFactory.cs" />
     <Compile Include="Latency.cs" />
+    <Compile Include="LatencyRecorder.cs" />
     <Compile Include="PerformanceCounters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\samples\Microsoft.AspNet.SignalR.LoadTestHarness\Microsoft.AspNet.SignalR.LoadTestHarness.csproj">
+      <Project>{B94E0027-2664-4DAC-BA32-7AA12BFCEE10}</Project>
+      <Name>Microsoft.AspNet.SignalR.LoadTestHarness</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.AspNet.SignalR.Client45\Microsoft.AspNet.SignalR.Client45.csproj">
       <Project>{50f8a174-695e-498c-b105-bdbe6b398646}</Project>
       <Name>Microsoft.AspNet.SignalR.Client45</Name>

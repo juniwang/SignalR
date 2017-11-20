@@ -26,10 +26,10 @@ namespace Microsoft.AspNet.SignalR.Crank
         [CommandLineParameter(Command = "Transport", Required = false, Default = "auto", Description = "Transport name. Default: auto")]
         public string Transport { get; set; }
 
-        [CommandLineParameter(Command = "BatchSize", Required = false, Default = 1, Description = "(Connect phase) Batch size for parallel connections. Default: 1 (batch disabled)")]
+        [CommandLineParameter(Command = "BatchSize", Required = false, Default = 50, Description = "(Connect phase) Batch size for parallel connections. Default: 1 (batch disabled)")]
         public int BatchSize { get; set; }
 
-        [CommandLineParameter(Command = "ConnectInterval", Required = false, Default = 10, Description = "(Connect phase) Time in milliseconds between connection adds. Default: 10 ms")]
+        [CommandLineParameter(Command = "ConnectInterval", Required = false, Default = 500, Description = "(Connect phase) Time in milliseconds between connection adds. Default: 10 ms")]
         public int ConnectInterval { get; set; }
 
         [CommandLineParameter(Command = "Connections", Required = false, Default = 100000, Description = "(Connect phase) Number of connections to open. Default: 100000")]
@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.SignalR.Crank
             {
                 if (controller == null)
                 {
-                    controller = String.IsNullOrEmpty(ControllerUrl) ? "localhost" : GetHostName(ControllerUrl);
+                    controller = string.IsNullOrEmpty(ControllerUrl) ? "localhost" : GetHostName(ControllerUrl);
                 }
                 return controller;
             }

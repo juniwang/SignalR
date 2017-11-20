@@ -204,12 +204,22 @@ namespace Microsoft.AspNet.SignalR.Crank
             var payload = (Arguments.SendBytes == 0) ? string.Empty : new string('a', Arguments.SendBytes);
             while (TestPhase == ControllerEvents.Send)
             {
-                if (!string.IsNullOrEmpty(payload))
+                if (Arguments.SendBytes > 0)
                 {
                     await Task.WhenAll(Connections.Select(c =>
                     {
+                        // Send beginning timestamp string which starts with C for latency calculation.
                         var payloadWithTimestamp = "C" + DateTime.UtcNow.Ticks.ToString() + "|" + payload;
-                        return c.Send(payloadWithTimestamp);
+                        payloadWithTimestamp = payloadWithTimestamp.Substring(0, Math.Max(Arguments.SendBytes, 20));
+                        try
+                        {
+                            return c.Send(payloadWithTimestamp);
+                        }
+                        catch (Exception)
+                        {
+                            return Task.FromResult(string.Empty);
+                        }
+
                     }));
                 }
 
@@ -224,7 +234,11 @@ namespace Microsoft.AspNet.SignalR.Crank
                 if ((TestPhase == ControllerEvents.Disconnect) ||
                     (TestPhase == ControllerEvents.Abort))
                 {
-                    Parallel.ForEach(Connections, c => c.Dispose());
+                    Parallel.ForEach(Connections, c =>
+                    {
+                        c.Stop();
+                        c.Dispose();
+                    });
                 }
             }
         }
@@ -297,11 +311,9 @@ namespace Microsoft.AspNet.SignalR.Crank
 
         private static void Conn_Received(string data)
         {
-            if (data.Length <= 40)
-                return;
-
-            string ticks = data.Substring(0, 40);
-            Latency.UpdateLatency(ticks);
+            string sub = data.Substring(0, Math.Min(data.Length, 40));
+            //Latency.UpdateLatency(sub);
+            LatencyRecorder.UpdateLatency(sub);
         }
     }
 }

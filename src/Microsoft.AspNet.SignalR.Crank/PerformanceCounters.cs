@@ -16,10 +16,12 @@ namespace Microsoft.AspNet.SignalR.Crank
 
         public PerformanceCounters(string host, string signalRInstance)
         {
-            ServerAvailableMBytesCounter = LoadCounter("Memory", "Available MBytes", host);
-            ServerTcpConnectionsEstCounter = LoadCounter("TCPv4", "Connections Established", host);
+            //ServerAvailableMBytesCounter = LoadCounter("Memory", "Available MBytes", host);
+            //ServerTcpConnectionsEstCounter = LoadCounter("TCPv4", "Connections Established", host);
+            ServerAvailableMBytesCounter = LoadCounter("Memory", "Available MBytes", "localhost");
+            ServerTcpConnectionsEstCounter = LoadCounter("TCPv4", "Connections Established", "localhost");
 
-            if (!String.IsNullOrEmpty(signalRInstance))
+            if (!string.IsNullOrEmpty(signalRInstance))
             {
                 SignalRConnectionsCurrentCounter = LoadCounter("SignalR", "Connections Current", host, signalRInstance);
                 SignalRConnectionsReconnectedCounter = LoadCounter("SignalR", "Connections Reconnected", host, signalRInstance);
